@@ -1,1 +1,1 @@
-from .equivalentwidths import specewmeasure
+from .equivalentwidths import trapz_ew
