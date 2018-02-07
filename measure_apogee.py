@@ -3,6 +3,7 @@ import numpy as np
 from astropy.io import fits
 import apogee.tools.read as apread
 import apogee.spec.plot as splot
+from tqdm import tqdm
 
 def measure_apogee(allStar, linelist_obj, output_fits=False):
     if isinstance(linelist_obj, str):
@@ -16,7 +17,7 @@ def measure_apogee(allStar, linelist_obj, output_fits=False):
         errspec, hdr = apread.aspcapStar(allStar['LOCATION_ID'][i], allStar['APOGEE_ID'][i], ext=2)
         spec = np.dstack([lams, specs, errspec])[0]
         ews[i], errs[i] = equivalentwidths.measurelinelist(spec, linelist_obj, error=True)
-    return ews, errs        
+    return ews, errs
 
 def make_speclist(allStar):
     loc_ids = allStar['LOCATION_ID']
