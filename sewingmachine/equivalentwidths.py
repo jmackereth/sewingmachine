@@ -30,7 +30,7 @@ def measurelinelist(spec, line_obj,
     ----------------
     OUTPUT:
     EWs - array of measured EWs, in the order of input linelist
-    flags (optional) - list of warning flags for each measurement
+    flags (optional) - integer bitmask warning flags for each measurement
     ----------------
     HISTORY:
     2018/29/01 - Written - Mackereth (ARI, LJMU)
@@ -40,7 +40,7 @@ def measurelinelist(spec, line_obj,
     nlines = len(line_obj.labels)
     EWs = np.empty(len(line_obj.labels))
     if return_flags:
-        flags = []
+        flags = np.empty(len(line_obj.labels))
     if error:
         errs = np.empty(len(line_obj.labels))
     if plot:
@@ -54,14 +54,14 @@ def measurelinelist(spec, line_obj,
         if not plot:
             if return_flags:
                 if error:
-                    EWs[i], errs[i], flagi = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
+                    EWs[i], errs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                                       sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,
                                                       exclude_bad=exclude_bad, error=True, return_flags=return_flags)
                 else:
-                    EWs[i], flagi = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
+                    EWs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                             sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,
                                             exclude_bad=exclude_bad, return_flags=return_flags)
-                flags.append(flagi)
+            
             else:
                 if error:
                     EWs[i], errs[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
@@ -137,13 +137,13 @@ def trapz_ew(spec, integration, windows,
     ----------------
     OUTPUT:
     EW - the measured EW
-    flags (optional) - list of warning flags
+    flags (optional) - integer bitmask for warning flags
     ----------------
     HISTORY:
     2018/29/01 - Written - Mackereth (ARI, LJMU)
     '''
     all_clipped = False
-    flags = []
+    flags = 0
     spec_x = spec[:,0] #create arrays for spectra
     spec_y = spec[:,1]
     norm_pix = []
@@ -157,12 +157,12 @@ def trapz_ew(spec, integration, windows,
             bad_excluded = True
             if len(spec_y[windowmask][spec_y[windowmask] > 0.0001]) < 2:
                 all_clipped = True
-                flags.append('CONTINUUM_ALL_BAD')
+                flags += 2**1
                 if verbose:
                     print('Continuum all at 0 flux - returning NaN EW')
             else:
                 windowmask[spec_y < 0.0001] = 0
-                flags.append('CONTINUUM_BAD_PIXEL')
+                flags += 2**0
     # do initial continuum fit
     cont_fit = np.polyfit(spec_x[windowmask],spec_y[windowmask], 1)
     cont_poly = np.poly1d(cont_fit)
@@ -177,7 +177,7 @@ def trapz_ew(spec, integration, windows,
             if verbose:
                 print('Bad continuum, returning NaN EW - consider re-defining windows?')
             if return_flags:
-                flags.append('CONTINUUM_ALL_CLIPPED')
+                flags += 2**2
             all_clipped = True
         if not all_clipped:
             if verbose:
@@ -200,7 +200,7 @@ def trapz_ew(spec, integration, windows,
     line_y[0] = interpol(integration[0])
     line_y[-1] = interpol(integration[1])
     if return_flags and (line_y < 0.0001).any():
-        flags.append('INTEGRATION_BAD_PIXEL')
+        flags += 2**3
     #continuum over the integration region
     cont_y = cont_poly(line_x)
     #normalise the flux over this range
@@ -230,6 +230,8 @@ def trapz_ew(spec, integration, windows,
         plt.plot(spec_x[plotmask], cont_poly(spec_x[plotmask]), color='Black', linestyle='dashed')
         plt.xlabel(r'$\lambda [\mathrm{\AA}]$')
         plt.ylabel(r'$f/f_c(\lambda)$')
+    if flags > 0:
+        flags += 2**4
     if all_clipped:
         # if bad-continuum return NaN
         if return_flags:
