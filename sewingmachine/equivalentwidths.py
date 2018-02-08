@@ -150,15 +150,19 @@ def trapz_ew(spec, integration, windows,
     norm_lambda = []
     # mask out continuum pixels
     windowmask = np.zeros(len(spec_x), dtype=bool)
-    bad_excluded = False
+    all_clipped = False
     for i in windows:
         windowmask[(spec_x <= i[1]) & (spec_x >= i[0])] = 1
-        if exclude_bad:
-            if len(spec_y[windowmask][spec_y[windowmask] < 0.0001]) > 0:
-                bad_excluded = True
-            windowmask[spec_y < 0.0001] = 0
-    if bad_excluded:
-        flags.append('CONTINUUM_BAD_PIXEL')
+        if exclude_bad and len(spec_y[windowmask][spec_y[windowmask] < 0.0001]) > 0:
+            bad_excluded = True
+            if len(spec_y[windowmask][spec_y[windowmask] > 0.0001]) < 2:
+                all_clipped = True
+                flags.append('CONTINUUM_ALL_BAD')
+                if verbose:
+                    print('Continuum all at 0 flux - returning NaN EW')
+            else:
+                windowmask[spec_y < 0.0001] = 0
+                flags.append('CONTINUUM_BAD_PIXEL')
     # do initial continuum fit
     cont_fit = np.polyfit(spec_x[windowmask],spec_y[windowmask], 1)
     cont_poly = np.poly1d(cont_fit)
@@ -169,7 +173,6 @@ def trapz_ew(spec, integration, windows,
         in_clip = residual <= std
         clipped_inds = np.where(windowmask & ~in_clip)
         windowmask = windowmask & in_clip
-        all_clipped = False
         if len(spec_x[windowmask]) < 2:
             if verbose:
                 print('Bad continuum, returning NaN EW - consider re-defining windows?')
