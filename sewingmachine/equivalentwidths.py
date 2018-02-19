@@ -10,7 +10,8 @@ def measurelinelist(spec, line_obj,
                     error = False,
                     plot=False,
                     verbose=False,
-                    return_flags=False):
+                    return_flags=True
+                    ):
     '''
     measurelinelist
     ----------------
@@ -61,7 +62,7 @@ def measurelinelist(spec, line_obj,
                     EWs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                             sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,
                                             exclude_bad=exclude_bad, return_flags=return_flags)
-            
+
             else:
                 if error:
                     EWs[i], errs[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
