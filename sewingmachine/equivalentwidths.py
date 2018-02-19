@@ -40,7 +40,7 @@ def measurelinelist(spec, line_obj,
     nlines = len(line_obj.labels)
     EWs = np.empty(len(line_obj.labels))
     if return_flags:
-        flags = np.empty(len(line_obj.labels))
+        flags = np.empty(len(line_obj.labels), dtype=int)
     if error:
         errs = np.empty(len(line_obj.labels))
     if plot:
@@ -77,14 +77,14 @@ def measurelinelist(spec, line_obj,
             axes.append(ax)
             if return_flags:
                 if error:
-                    EWs[i], errs[i], flagi = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
+                    EWs[i], errs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                   sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,plot=True,
                                   exclude_bad=exclude_bad, error=True, return_flags=return_flags)
                 else:
-                    EWs[i], flagi = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
+                    EWs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                   sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,plot=True,
                                   exclude_bad=exclude_bad, return_flags=return_flags)
-                flags.append(flagi)
+                
             else:
                 if error:
                     EWs[i], errs[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
@@ -232,6 +232,7 @@ def trapz_ew(spec, integration, windows,
         plt.ylabel(r'$f/f_c(\lambda)$')
     if flags > 0:
         flags += 2**4
+    flags = int(flags)
     if all_clipped:
         # if bad-continuum return NaN
         if return_flags:
