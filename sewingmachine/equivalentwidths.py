@@ -82,7 +82,7 @@ def measurelinelist(spec, line_obj,
                                   sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,plot=True,
                                   exclude_bad=exclude_bad, error=True, return_flags=return_flags)
                 else:
-                    EWs[i], flagi = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
+                    EWs[i], flags[i] = trapz_ew(spec, line_obj.integration[i], line_obj.windows[i],
                                   sigmaclip = sigmaclip, sigma = sigma, verbose=verbose,plot=True,
                                   exclude_bad=exclude_bad, return_flags=return_flags)
                 flags.append(flagi)
