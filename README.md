@@ -1,4 +1,4 @@
-# SEWing-machine
+# sewingmachine
 Tools for fast and easy spectra equivalent widths
 
 ## Overview
