@@ -13,7 +13,7 @@ The best way to install the package for now is to clone the repository and use `
 
 ## Basic Usage
 
-`sewingmachine` is intended to be as flexible as possible, whilst delivering maximal stability and standardisation in equivalent width measurements. In future versions,
+`sewingmachine` is intended to be as flexible as possible, whilst delivering maximal stability and standardisation in equivalent width measurements. In future versions, we hope to add to the different measurement methods available - for now, we can just do a simple trapezium integration of a spectrum.
 
 For the simplest equivalent width measurement, first load your spectrum into a `[N_lambda,2]` array (`[N_lambda,3]` if you have an error array, but we'll get to that later), and pass it to `equivalentwidths.trapz_ew` like so:
 
