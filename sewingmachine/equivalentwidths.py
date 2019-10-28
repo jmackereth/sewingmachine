@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import linelist
+from . import linelist
 from scipy.interpolate import interp1d
 
 def measurelinelist(spec, line_obj,
@@ -182,7 +182,7 @@ def trapz_ew(spec, integration, windows,
             all_clipped = True
         if not all_clipped:
             if verbose:
-                print 'Re-fitting continuum after sigma clipping...'
+                print('Re-fitting continuum after sigma clipping...')
             cont_fit = np.polyfit(spec_x[windowmask],spec_y[windowmask], 1)
             cont_poly = np.poly1d(cont_fit)
     # mask out integration region
