@@ -8,4 +8,5 @@ setup(name='sewingmachine',
       author_email='J.E.Mackereth@2011.ljmu.ac.uk',
       license='MIT',
       packages=['sewingmachine'],
+      install_requires=['apogee', 'numpy', 'scipy', 'matplotlib', 'tqdm'],
       zip_safe=False)
