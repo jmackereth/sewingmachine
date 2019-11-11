@@ -27,12 +27,15 @@ def measure_apogee(allStar, linelist_obj, output_fits=False, *args, **kwargs):
         lockey = 'FIELD'
     for i in tqdm(range(len(apogee_ids))):
         try:
-            if isinstance(allStar[lockey][i], np.bytes_):
-                specs, hdr = apread.aspcapStar(allStar[lockey][i].decode(), allStar['APOGEE_ID'][i].decode(), ext=1)
-                errspec, hdr = apread.aspcapStar(allStar[lockey][i].decode(), allStar['APOGEE_ID'][i].decode(), ext=2)
-            else:
-                specs, hdr = apread.aspcapStar(allStar[lockey][i], allStar['APOGEE_ID'][i], ext=1)
-                errspec, hdr = apread.aspcapStar(allStar[lockey][i], allStar['APOGEE_ID'][i], ext=2)
+            try:
+                loc, id = str(allStar[lockey][i], 'utf-8'), str(allStar['APOGEE_ID'][i], 'utf-8')
+            except (UnicodeDecodeError, AttributeError):
+                if isinstance(allStar[lockey][i], str):
+                    loc, id = allStar[lockey][i], allStar['APOGEE_ID'][i]
+                else:
+                    raise IOError('Input allStar file seems to be incorrectly formatted, please check that the FIELD and APOGEE_ID fields are readable, and read in as either bytes or string')
+            specs, hdr = apread.aspcapStar(loc, id, ext=1)
+            errspec, hdr = apread.aspcapStar(loc, id, ext=2)
             spec = np.dstack([lams, specs, errspec])[0]
             out = equivalentwidths.measurelinelist(spec, linelist_obj, error=True, *args, **kwargs)
             ews[i], errs[i] = out[0], out[1]
