@@ -34,14 +34,13 @@ def measure_apogee(allStar, linelist_obj, output_fits=False, *args, **kwargs):
                     loc, id = allStar[lockey][i], allStar['APOGEE_ID'][i]
                 else:
                     raise IOError('Input allStar file seems to be incorrectly formatted, please check that the FIELD and APOGEE_ID fields are readable, and read in as either bytes or string')
-            print('Running Latest Version')
-            specs, hdr = apread.aspcapStar(loc, id, ext=1)
-            errspec, hdr = apread.aspcapStar(loc, id, ext=2)
+            scope = allStar['TELESCOPE'][i]
+            specs, hdr = apread.aspcapStar(loc, id, ext=1, telescope=scope)
+            errspec, hdr = apread.aspcapStar(loc, id, ext=2, telescope=scope)
             spec = np.dstack([lams, specs, errspec])[0]
             out = equivalentwidths.measurelinelist(spec, linelist_obj, error=True, *args, **kwargs)
             ews[i], errs[i] = out[0], out[1]
         except IOError:
-            print('Running Latest Version')
             print('Spectrum missing from SAS? Check that your RESULTS_VERS is set correctly.')
             ews[i], errs[i] = np.ones(np.shape(linelist_obj.labels)[0])*np.nan, np.ones(np.shape(linelist_obj.labels)[0])*np.nan
     return ews, errs
